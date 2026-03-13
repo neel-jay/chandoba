@@ -792,19 +792,39 @@
                 background: rgba(10, 10, 15, 0.95);
                 backdrop-filter: blur(10px);
                 padding: 0.75rem 1rem;
+                flex-wrap: wrap;
+                gap: 0.5rem;
             }
             
             .modal-title {
                 font-size: 0.85rem;
+                padding-right: 2.5rem;
+                width: 100%;
             }
             
             .modal-btn {
-                padding: 0.4rem 0.75rem;
-                font-size: 0.8rem;
+                padding: 0.35rem 0.6rem;
+                font-size: 0.75rem;
             }
             
             .modal-actions {
                 gap: 0.35rem;
+                width: 100%;
+                flex-wrap: wrap;
+                justify-content: flex-start;
+            }
+            
+            .page-progress-container {
+                display: none !important;
+            }
+            
+            .modal-close {
+                position: absolute;
+                top: 0.5rem;
+                right: 0.75rem;
+                width: 32px;
+                height: 32px;
+                font-size: 1.25rem;
             }
         }
 
@@ -1236,7 +1256,7 @@
             <div class="modal-header">
                 <div class="modal-title" id="modalTitle">Reading Comic</div>
                 <div class="modal-actions">
-                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <div class="page-progress-container" style="display: flex; align-items: center; gap: 0.5rem;">
                         <span style="color: var(--text-muted); font-size: 0.85rem;">Page:</span>
                         <input type="number" id="pageInput" placeholder="?" min="1" style="width: 60px; padding: 0.4rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 0.85rem;">
                         <button class="modal-btn" onclick="saveProgress()">💾 Save</button>
