@@ -743,6 +743,15 @@
             opacity: 1;
         }
 
+        /* On mobile, always show header - no hover */
+        @media (max-width: 767px) {
+            .modal-overlay.fullscreen .modal-header {
+                opacity: 1 !important;
+                position: fixed;
+                top: 0;
+            }
+        }
+
         .modal-content {
             width: 100%;
             height: 100%;
@@ -762,6 +771,40 @@
                 max-width: 1600px;
                 border-radius: 12px;
                 border: 1px solid var(--border);
+            }
+        }
+
+        /* Mobile fullscreen styles */
+        @media (max-width: 767px) {
+            .modal-overlay .modal-content {
+                width: 100vw;
+                height: 100vh;
+                border-radius: 0;
+                border: none;
+            }
+            
+            .modal-overlay .modal-header {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                z-index: 10;
+                background: rgba(10, 10, 15, 0.95);
+                backdrop-filter: blur(10px);
+                padding: 0.75rem 1rem;
+            }
+            
+            .modal-title {
+                font-size: 0.85rem;
+            }
+            
+            .modal-btn {
+                padding: 0.4rem 0.75rem;
+                font-size: 0.8rem;
+            }
+            
+            .modal-actions {
+                gap: 0.35rem;
             }
         }
 
@@ -1696,10 +1739,19 @@
             modal.classList.add('active');
             document.body.style.overflow = 'hidden';
             
-            // Auto-enter fullscreen after a short delay
-            setTimeout(() => {
-                toggleFullscreen();
-            }, 500);
+            // Auto-enter fullscreen on desktop only (mobile blocks this)
+            const isMobile = window.matchMedia('(max-width: 768px)').matches || 
+                            /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            
+            if (!isMobile) {
+                setTimeout(() => {
+                    toggleFullscreen();
+                }, 500);
+            } else {
+                // On mobile, expand the modal to fill viewport
+                const modal = document.getElementById('readerModal');
+                modal.classList.add('fullscreen');
+            }
         }
 
         function closeReader() {
@@ -1722,19 +1774,36 @@
             const modal = document.getElementById('readerModal');
             const btn = document.getElementById('fullscreenBtn');
             
+            // Check if mobile
+            const isMobile = window.matchMedia('(max-width: 768px)').matches || 
+                            /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            
+            if (isMobile) {
+                // On mobile, toggle visual fullscreen class only
+                if (modal.classList.contains('fullscreen')) {
+                    modal.classList.remove('fullscreen');
+                    btn.textContent = '⛶ Fullscreen';
+                    // Show header temporarily
+                    const header = modal.querySelector('.modal-header');
+                    header.style.opacity = '1';
+                } else {
+                    modal.classList.add('fullscreen');
+                    btn.textContent = '⛶ Exit Fullscreen';
+                }
+                return;
+            }
+            
+            // Desktop: use native fullscreen API
             if (!document.fullscreenElement) {
-                // Enter fullscreen
                 modal.requestFullscreen().then(() => {
                     modal.classList.add('fullscreen');
                     btn.textContent = '⛶ Exit Fullscreen';
                 }).catch(err => {
                     console.log('Fullscreen error:', err);
-                    // Fallback: just expand the modal visually
                     modal.classList.add('fullscreen');
                     btn.textContent = '⛶ Exit Fullscreen';
                 });
             } else {
-                // Exit fullscreen
                 document.exitFullscreen().then(() => {
                     modal.classList.remove('fullscreen');
                     btn.textContent = '⛶ Fullscreen';
@@ -1752,8 +1821,27 @@
             const btn = document.getElementById('fullscreenBtn');
             
             if (!document.fullscreenElement && modal.classList.contains('active')) {
-                modal.classList.remove('fullscreen');
-                if (btn) btn.textContent = '⛶ Fullscreen';
+                // Only remove class if not on mobile (mobile uses class-based fullscreen)
+                const isMobile = window.matchMedia('(max-width: 768px)').matches;
+                if (!isMobile) {
+                    modal.classList.remove('fullscreen');
+                    if (btn) btn.textContent = '⛶ Fullscreen';
+                }
+            }
+        });
+
+        // Handle orientation change on mobile
+        window.addEventListener('orientationchange', () => {
+            const modal = document.getElementById('readerModal');
+            if (modal.classList.contains('active')) {
+                // Re-apply fullscreen class for mobile landscape
+                const isMobile = window.matchMedia('(max-width: 768px)').matches || 
+                                /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                if (isMobile) {
+                    setTimeout(() => {
+                        modal.classList.add('fullscreen');
+                    }, 100);
+                }
             }
         });
 
